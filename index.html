@@ -32,7 +32,7 @@ h1,h2,h3,p{margin:0}
     radial-gradient(ellipse at 85% 80%,rgba(214,180,120,.35),transparent 60%),
     var(--paper),#f3e8d2}
 @media (min-width:700px){.frame{box-shadow:0 0 0 1px rgba(122,79,18,.25),0 30px 80px rgba(60,35,5,.35)}}
-[data-in]{opacity:0}
+[data-in]{opacity:0;will-change:transform,opacity}
 
 /* canopy valance + strands */
 .toran{position:absolute;left:0;top:0;width:100%;height:28cqw;z-index:14;pointer-events:none;filter:drop-shadow(0 1.2cqw 1.2cqw rgba(60,30,0,.22))}
@@ -40,11 +40,11 @@ h1,h2,h3,p{margin:0}
 .str.l{left:2cqw}.str.r{right:2cqw}
 
 /* scene 1: scroll */
-.scroll{position:absolute;left:50%;top:51%;width:68cqw;height:var(--h,14px);transform:translate(-50%,-50%);z-index:8}
-.parch{position:absolute;inset:0;overflow:hidden;
+.scroll{position:absolute;left:50%;top:51%;width:68cqw;height:var(--fullH,500px);transform:translate(-50%,-50%);z-index:8}
+.parch{position:absolute;inset:0;overflow:hidden;clip-path:inset(calc(var(--fullH,500px)/2 - 7px) 0);will-change:clip-path;
   background:var(--paper),linear-gradient(90deg,#d99a4e,#f3cf8b 12%,#f7dc9f 50%,#f1c47a 88%,#d58f43);
   box-shadow:inset 0 0 30px rgba(120,60,10,.5),0 10px 24px rgba(60,30,0,.28)}
-.scroll-content{position:absolute;left:0;right:0;top:0;height:var(--fullH,500px);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;padding:8cqw 3cqw 7cqw;text-align:center}
+.scroll-content{position:absolute;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;padding:8cqw 3cqw 7cqw;text-align:center}
 .s-top{font:600 2.7cqw 'Poppins';letter-spacing:.34em;text-transform:uppercase;color:#8a5a1a}
 .s-sub{font:700 6.2cqw 'Noto Serif Devanagari',serif;color:var(--red);line-height:1.2;margin-top:1cqw}
 .s-gan{width:min(62cqw,36cqh);height:auto;display:block;filter:drop-shadow(0 .8cqw 1.4cqw rgba(60,10,10,.35))}
@@ -52,6 +52,7 @@ h1,h2,h3,p{margin:0}
 .roll{position:absolute;left:-4cqw;right:-4cqw;height:7cqw;border-radius:3.5cqw;
   background:linear-gradient(#a06a32,#f1c47a 30%,#e0a65a 55%,#8a5424);box-shadow:0 3px 6px rgba(0,0,0,.35)}
 .roll.top{top:-3.5cqw}.roll.bot{bottom:-3.5cqw}
+.roll{will-change:transform}
 .roll::before,.roll::after{content:"";position:absolute;top:50%;width:6cqw;height:11cqw;transform:translateY(-50%);border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#b57a3e,#5b3414 70%);box-shadow:0 2px 5px rgba(0,0,0,.4)}
 .roll::before{left:-3.5cqw}.roll::after{right:-3.5cqw}
@@ -142,6 +143,17 @@ h1,h2,h3,p{margin:0}
 .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
 .btns .btn{margin-top:0}
 
+/* background music button */
+.mus{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:61;width:42px;height:42px;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;background:rgba(94,12,31,.88);color:var(--gold-l);border:1px solid rgba(217,164,65,.9);
+  box-shadow:0 4px 12px rgba(40,5,15,.3);-webkit-tap-highlight-color:transparent;padding:0}
+.mus svg{width:20px;height:20px}
+.mus .w{opacity:0}.mus.on .w{opacity:1}.mus .x{opacity:1}.mus.on .x{opacity:0}
+.mus.nudge::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--gold);animation:ring 1.8s ease-out infinite}
+.mus-tip{position:fixed;top:calc(20px + env(safe-area-inset-top,0px));right:64px;z-index:61;padding:5px 11px;border-radius:999px;background:rgba(94,12,31,.88);
+  color:var(--gold-l);font:600 .6rem 'Poppins',sans-serif;letter-spacing:.14em;text-transform:uppercase;pointer-events:none;transition:opacity .5s}
+.mus-tip.off{opacity:0}
+@keyframes ring{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.35);opacity:0}}
 /* persistent scroll cue */
 .cue{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;pointer-events:none;
   display:flex;align-items:center;gap:7px;padding:6px 14px 6px 15px;border-radius:999px;
@@ -153,7 +165,7 @@ h1,h2,h3,p{margin:0}
 @keyframes cuebob{0%,100%{transform:translateY(-1px)}50%{transform:translateY(2.5px)}}
 .reveal{opacity:0;transform:translateY(30px);transition:opacity .9s ease var(--d,0s),transform .9s ease var(--d,0s)}
 .reveal.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){.flame,.glow,.dn.on,.cue svg{animation:none}.reveal{transition:none;opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.flame,.glow,.dn.on,.cue svg,.mus.nudge::after{animation:none}.reveal{transition:none;opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -285,6 +297,16 @@ h1,h2,h3,p{margin:0}
     <svg class="tb" id="fb2" viewBox="0 0 480 60" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
   </footer>
 </main>
+
+<audio id="bgm" src="bgm.mp3" loop preload="none"></audio>
+<button class="mus nudge" id="mus" type="button" aria-label="Play background music" aria-pressed="false">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 9.5v5h3.6L13 19V5L7.6 9.5H4z" fill="currentColor" stroke="none"/>
+    <g class="w"><path d="M16 9.2a4 4 0 0 1 0 5.6"/><path d="M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/></g>
+    <path class="x" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/>
+  </svg>
+</button>
+<div class="mus-tip" id="musTip" aria-hidden="true">Tap for music</div>
 
 <div class="cue" id="cue" aria-hidden="true">Scroll down
   <svg viewBox="0 0 12 8" width="10" height="7"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -504,17 +526,23 @@ const items = [...document.querySelectorAll("[data-in],[data-out]")].map(el => (
   fx: el.dataset.fx || "fade"
 }));
 
-function update() {
-  const total = story.offsetHeight - innerHeight;
-  const p = clamp(-story.getBoundingClientRect().top / total);
-  const fh = frame.clientHeight;
-  $("#cue").classList.toggle("off", scrollY + innerHeight >= document.documentElement.scrollHeight - 140);
-
-  // scene 1: unroll, hold, roll back up
-  const fullH = fh * 0.66;
-  const amt = ease(seg(p, 0.02, 0.16)) * (1 - ease(seg(p, 0.24, 0.31)));
-  scrollEl.style.setProperty("--h", lerp(14, fullH, amt) + "px");
+let total = 1, fh = 1, storyTop = 0, fullH = 1;
+function measure() {
+  total = story.offsetHeight - innerHeight;
+  fh = frame.clientHeight;
+  storyTop = story.getBoundingClientRect().top + scrollY;
+  fullH = fh * 0.66;
   scrollEl.style.setProperty("--fullH", fullH + "px");
+}
+
+function render(p) {
+  // scene 1: the scroll unrolls from its centre, holds, then rolls back up
+  // (clip-path + transforms only, so it never forces layout and stays smooth)
+  const amt = ease(seg(p, 0.02, 0.16)) * (1 - ease(seg(p, 0.24, 0.31)));
+  const d = (fullH - 14) / 2 * (1 - amt);
+  parch.style.clipPath = `inset(${d}px 0)`;
+  rollT.style.transform = `translate3d(0,${d}px,0)`;
+  rollB.style.transform = `translate3d(0,${-d}px,0)`;
 
   // arch slides up from below
   arch.style.translate = `0 ${(1 - ease(seg(p, 0.47, 0.55))) * fh}px`;
@@ -540,11 +568,65 @@ function update() {
     it.el.style.scale = sc;
   }
 }
-let ticking = false;
-const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { update(); ticking = false; }); } };
-addEventListener("scroll", onScroll, { passive: true });
-addEventListener("resize", onScroll);
-update();
+
+// the shown progress eases toward the real scroll position, which smooths out
+// choppy wheel steps and touch flicks
+const parch = $(".parch"), rollT = $(".roll.top"), rollB = $(".roll.bot");
+let target = 0, shown = -1, raf = 0;
+function readTarget() {
+  target = clamp((scrollY - storyTop) / total);
+  $("#cue").classList.toggle("off", scrollY + innerHeight >= document.documentElement.scrollHeight - 140);
+}
+function loop() {
+  const diff = target - shown;
+  shown = Math.abs(diff) < 0.0004 ? target : shown + diff * 0.16;
+  render(shown);
+  raf = shown === target ? 0 : requestAnimationFrame(loop);
+}
+function kick() { readTarget(); if (!raf) raf = requestAnimationFrame(loop); }
+addEventListener("scroll", kick, { passive: true });
+addEventListener("resize", () => { measure(); shown = -1; kick(); });
+measure(); readTarget(); shown = target; render(shown);
+addEventListener("load", () => { measure(); kick(); });
+
+/* ---------- background music ---------- */
+(() => {
+  const a = $("#bgm"), btn = $("#mus"), tip = $("#musTip");
+  const MAX = 0.4;
+  let fade = 0, want = false;
+  const ramp = (to, done) => {
+    cancelAnimationFrame(fade);
+    const step = () => {
+      const d = to - a.volume;
+      if (Math.abs(d) < 0.02) { a.volume = to; done && done(); return; }
+      a.volume = Math.max(0, Math.min(1, a.volume + Math.sign(d) * 0.02));
+      fade = requestAnimationFrame(step);
+    };
+    step();
+  };
+  const set = on => {
+    want = on;
+    btn.classList.toggle("on", on);
+    btn.classList.remove("nudge");
+    tip.classList.add("off");
+    btn.setAttribute("aria-pressed", on);
+    btn.setAttribute("aria-label", on ? "Mute background music" : "Play background music");
+  };
+  btn.addEventListener("click", () => {
+    if (!want) {
+      a.volume = 0;
+      a.play().then(() => { set(true); ramp(MAX); }).catch(() => set(false));
+    } else {
+      set(false);
+      ramp(0, () => a.pause());
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) a.pause();
+    else if (want) a.play().catch(() => {});
+  });
+  setTimeout(() => tip.classList.add("off"), 9000);
+})();
 </script>
 </body>
 </html>
