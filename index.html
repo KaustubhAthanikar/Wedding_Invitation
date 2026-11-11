@@ -306,7 +306,7 @@ h1,h2,h3,p{margin:0}
     <path class="x" d="M16.5 9.5l5 5M21.5 9.5l-5 5"/>
   </svg>
 </button>
-<div class="mus-tip" id="musTip" aria-hidden="true">Tap for music</div>
+<div class="mus-tip off" id="musTip" aria-hidden="true"></div>
 
 <div class="cue" id="cue" aria-hidden="true">Scroll down
   <svg viewBox="0 0 12 8" width="10" height="7"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -619,7 +619,6 @@ addEventListener("load", () => { measure(); readTarget(); shown = target; render
   start().then(paint).catch(() => {
     // 2) browsers block sound until the visitor interacts, so start on the first tap / key press
     paint();
-    say("Tap anywhere to start music");
     const unlock = e => {
       if (!wantPlay || !a.paused) return cleanup();
       if (btn.contains(e.target)) return;     // the button handles its own taps
