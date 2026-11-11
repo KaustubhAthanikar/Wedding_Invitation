@@ -298,7 +298,7 @@ h1,h2,h3,p{margin:0}
   </footer>
 </main>
 
-<audio id="bgm" src="bgm.mp3" loop preload="none"></audio>
+<audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
 <button class="mus nudge" id="mus" type="button" aria-label="Play background music" aria-pressed="false">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <path d="M4 9.5v5h3.6L13 19V5L7.6 9.5H4z" fill="currentColor" stroke="none"/>
@@ -599,32 +599,57 @@ addEventListener("load", () => { measure(); readTarget(); shown = target; render
 /* ---------- background music ---------- */
 (() => {
   const a = $("#bgm"), btn = $("#mus"), tip = $("#musTip");
-  let want = false;                       // what the visitor asked for
-  try { a.volume = 0.45; } catch (e) {}   // some phones ignore this and always play at device volume
-
-  const paint = () => {
-    btn.classList.toggle("on", want);
-    btn.setAttribute("aria-pressed", String(want));
-    btn.setAttribute("aria-label", want ? "Mute background music" : "Play background music");
+  try { a.volume = 0.45; } catch (e) {}      // some phones ignore this and use device volume
+  let hideT = 0;
+  const say = (msg, ms) => { tip.textContent = msg; tip.classList.remove("off"); clearTimeout(hideT); if (ms) hideT = setTimeout(() => tip.classList.add("off"), ms); };
+  const paint = () => {                       // the button always mirrors what the audio is really doing
+    const on = !a.paused;
+    btn.classList.toggle("on", on);
+    btn.classList.toggle("nudge", !on && !asked);
+    btn.setAttribute("aria-pressed", String(on));
+    btn.setAttribute("aria-label", on ? "Mute background music" : "Play background music");
+    if (on) tip.classList.add("off");
   };
-  const say = msg => { tip.textContent = msg; tip.classList.remove("off"); clearTimeout(say.t); say.t = setTimeout(() => tip.classList.add("off"), 3500); };
+  let asked = false;                          // true once the visitor has used the button themselves
+  let wantPlay = true;                        // music is on by default
+
+  const start = () => { const p = a.play(); return p && p.catch ? p : Promise.resolve(); };
+
+  // 1) try to start straight away (works when the browser allows it)
+  start().then(paint).catch(() => {
+    // 2) browsers block sound until the visitor interacts, so start on the first tap / key press
+    paint();
+    say("Tap anywhere to start music");
+    const unlock = e => {
+      if (!wantPlay || !a.paused) return cleanup();
+      if (btn.contains(e.target)) return;     // the button handles its own taps
+      start().then(() => { paint(); cleanup(); }).catch(() => {});
+    };
+    const evs = ["pointerdown", "touchend", "click", "keydown"];
+    const cleanup = () => evs.forEach(n => removeEventListener(n, unlock, true));
+    evs.forEach(n => addEventListener(n, unlock, true));
+    a.addEventListener("playing", cleanup, { once: true });
+  });
 
   btn.addEventListener("click", () => {
-    btn.classList.remove("nudge"); tip.classList.add("off");
-    want = !want; paint();
-    if (want) {
-      const p = a.play();
-      if (p && p.catch) p.catch(() => { want = false; paint(); say("Music unavailable"); });
+    asked = true;
+    if (a.paused) {
+      wantPlay = true;
+      start().then(paint).catch(() => say("Music unavailable", 3500));
     } else {
-      a.pause();                           // immediate, no fade, so it can never get stuck playing
+      wantPlay = false;
+      a.pause();                              // immediate, so it can never get stuck playing
     }
+    paint();
   });
-  a.addEventListener("error", () => { want = false; paint(); say("Music file missing"); });
+  a.addEventListener("play", paint);
+  a.addEventListener("pause", paint);
+  a.addEventListener("error", () => { paint(); say("Music file missing", 4000); });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) a.pause();
-    else if (want) a.play().catch(() => {});
+    else if (wantPlay) start().catch(() => {});
   });
-  setTimeout(() => tip.classList.add("off"), 9000);
+  paint();
 })();
 </script>
 </body>
